@@ -66,7 +66,7 @@ contract landRegi{
 
 
     lands[_landId - 1].buyer = msg.sender;
-    lands[_landId - 1].owner.transfer(lands[_landId - 1].totalPrice);
+    lands[_landId - 1].owner.transfer(lands[_landId - 1].currentTotalPrice);
 
     emit bought(_landId, msg.sender);
   }
