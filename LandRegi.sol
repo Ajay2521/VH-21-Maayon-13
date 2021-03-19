@@ -10,11 +10,13 @@ contract landRegi{
 
   struct land{
     string location;
+    uint latitude;
+    uint longitude;
     uint size;
     address payable owner;
     uint landId;
-    uint price; // in wel
-    uint totalPrice;
+    uint price; // in wel and getting price only for size one
+    uint totalPrice; // calculating the total price of the land using the single price
     address buyer;
   }
 
@@ -25,12 +27,14 @@ contract landRegi{
   event bought(uint landId, address buyer);
 
   // creating function registerland - to land registration.
-  function registerLand(string memory _location, uint _size, uint _price) public{
+  function registerLand(string memory _location, uint _latitute, uint _longitude, uint _size, uint _price) public{
 
     require(_price > 0, "Price should be greater than 0.");
     // enter land details inculding who is owner
     land memory newland;
     newland.location = _location;
+    newland.latitude = _latitute;
+    newland.longitude = _longitude;
     newland.size = _size;
     newland.price = _price * 10**18; // converting wels to ether
     newland.totalPrice = newland.size * newland.price;
@@ -43,8 +47,8 @@ contract landRegi{
   }
 
   // creating function getBalance -  to display the current balance in the contract 
-  function getDetails(uint _landId) public view returns (string memory, uint, uint, address, address){
-    return  (lands[_landId - 1].location, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
+  function getDetails(uint _landId) public view returns (string memory, uint, uint, uint, uint, address, address){
+    return  (lands[_landId - 1].location, lands[_landId - 1].latitude, lands[_landId - 1].longitude, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
   }
 
   // creating function buy - for buyer buys the land.
@@ -57,6 +61,7 @@ contract landRegi{
     require(lands[_landId - 1].totalPrice == msg.value,"Buyer buy price must be same as the price of owner");
 
     lands[_landId - 1].buyer = msg.sender;
+    lands[_landId - 1].owner.transfer(lands[_landId - 1].totalPrice);
 
     emit bought(_landId, msg.sender);
   }
