@@ -13,6 +13,7 @@ contract landRegi{
     uint latitude;
     uint longitude;
     uint size;
+    string landType;
     address payable owner;
     uint landId;
     uint price; // in wel and getting price only for size one
@@ -25,11 +26,11 @@ contract landRegi{
   land[] public lands;
 
   // events.
-  event registered(string location, uint landId, uint totalPrice, address owner);
+  event registered(string location, string landType, uint landId, uint totalPrice, address owner);
   event bought(uint landId, address buyer);
 
   // creating function registerland - to land registration.
-  function registerLand(string memory _location, uint _latitute, uint _longitude, uint _size, uint _price) public{
+  function registerLand(string memory _location, uint _latitute, uint _longitude, uint _size, string memory _landType, uint _price) public{
 
     require(_price > 0, "Price should be greater than 0.");
     // enter land details inculding who is owner
@@ -37,6 +38,7 @@ contract landRegi{
     newland.location = _location;
     newland.latitude = _latitute;
     newland.longitude = _longitude;
+    newland.landType = _landType;
     newland.size = _size;
     newland.price = _price * 10**18; // converting wels to ether
     newland.totalPrice = newland.size * newland.price;
@@ -45,12 +47,12 @@ contract landRegi{
     lands.push(newland);
     counter++;
 
-    emit registered(_location, newland.landId, newland.totalPrice, msg.sender);
+    emit registered(_location, _landType, newland.landId, newland.totalPrice, msg.sender);
   }
 
   // creating function getBalance -  to display the current balance in the contract 
-  function getDetails(uint _landId) public view returns (string memory, uint, uint, uint, address, address){
-    return  (lands[_landId - 1].location, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].currentTotalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
+  function getDetails(uint _landId) public view returns (string memory, string memory, uint, uint, uint, address, address){
+    return  (lands[_landId - 1].location, lands[_landId - 1].landType, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].currentTotalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
   }
 
   // creating function buy - for buyer buys the land.
@@ -62,6 +64,7 @@ contract landRegi{
     // players must invest astleast 1 ether
     require(lands[_landId - 1].currentTotalPrice == msg.value,"Buyer buy price must be same as the price of owner");
 
+
     lands[_landId - 1].buyer = msg.sender;
     lands[_landId - 1].owner.transfer(lands[_landId - 1].totalPrice);
 
@@ -71,5 +74,8 @@ contract landRegi{
     function updatePrice(uint _landId, uint _price) public{
         lands[_landId - 1].dailyPrice = _price * 10**18;
         lands[_landId - 1].currentTotalPrice = lands[_landId - 1].size * lands[_landId - 1].dailyPrice;
+        require(keccak256(abi.encodePacked((lands[_landId -1].landType))) == keccak256(abi.encodePacked(("farming"))));
+        lands[_landId -1].currentTotalPrice = 3 * lands[_landId - 1].currentTotalPrice; 
+       
     }
 }
