@@ -16,7 +16,9 @@ contract landRegi{
     address payable owner;
     uint landId;
     uint price; // in wel and getting price only for size one
+    uint dailyPrice; // in wel and getting daily price
     uint totalPrice; // calculating the total price of the land using the single price
+    uint currentTotalPrice; // current total price for the land
     address buyer;
   }
 
@@ -47,8 +49,8 @@ contract landRegi{
   }
 
   // creating function getBalance -  to display the current balance in the contract 
-  function getDetails(uint _landId) public view returns (string memory, uint, uint, uint, uint, address, address){
-    return  (lands[_landId - 1].location, lands[_landId - 1].latitude, lands[_landId - 1].longitude, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
+  function getDetails(uint _landId) public view returns (string memory, uint, uint, uint, address, address){
+    return  (lands[_landId - 1].location, lands[_landId - 1].size, lands[_landId - 1].totalPrice, lands[_landId - 1].currentTotalPrice, lands[_landId - 1].owner, lands[_landId - 1].buyer);
   }
 
   // creating function buy - for buyer buys the land.
@@ -58,7 +60,7 @@ contract landRegi{
     require(lands[_landId - 1].owner != msg.sender,"owner cannot buy his/her own land.");
 
     // players must invest astleast 1 ether
-    require(lands[_landId - 1].totalPrice == msg.value,"Buyer buy price must be same as the price of owner");
+    require(lands[_landId - 1].currentTotalPrice == msg.value,"Buyer buy price must be same as the price of owner");
 
     lands[_landId - 1].buyer = msg.sender;
     lands[_landId - 1].owner.transfer(lands[_landId - 1].totalPrice);
@@ -66,4 +68,8 @@ contract landRegi{
     emit bought(_landId, msg.sender);
   }
 
+    function updatePrice(uint _landId, uint _price) public{
+        lands[_landId - 1].dailyPrice = _price * 10**18;
+        lands[_landId - 1].currentTotalPrice = lands[_landId - 1].size * lands[_landId - 1].dailyPrice;
+    }
 }
